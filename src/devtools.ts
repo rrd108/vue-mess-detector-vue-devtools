@@ -1,17 +1,22 @@
 import { setupDevtoolsPlugin } from '@vue/devtools-api'
 import type { App } from 'vue'
+//import { analyze, FLAT_RULES } from 'vue-mess-detector'
 
 const inspectorId = 'vue-mess-detector-vue-devtools'
 
+// const runAnalysis = async () => {
+//     results = await analyze({ dir: './', apply: FLAT_RULES })
+//     console.log({ results })
+// }
+
 export const setupDevtools = (app: App) => {
-    console.log(`setupDevtools called`)
     setupDevtoolsPlugin({
         id: 'vue-mess-detector-vue-devtools',
         label: 'Vue Mess Detector',
         logo: 'https://raw.githubusercontent.com/rrd108/vue-mess-detector/refs/heads/main/docs/public/logo.png',
         packageName: 'vue-mess-detector-vue-devtools',
         homepage: 'https://github.com/rrd108/vue-mess-detector-vue-devtools',
-        app
+        app,
     }, api => {
         api.addInspector({
             id: inspectorId,
@@ -19,20 +24,37 @@ export const setupDevtools = (app: App) => {
             icon: 'data-usage',
         })
 
-        console.log(`before inspectComponent`)
-        api.on.inspectComponent((payload: any) => {
-            console.log(`inspectComponent called`)
-            payload.instanceData.state.push({
-                type: 'VMD',
-                key: 'hello',
-                value: 'data.message'
-            })
+        api.on.getInspectorTree((payload) => {
+            if (payload.inspectorId === inspectorId) {
+                payload.rootNodes = [{
+                    id: 'mess-summary',
+                    label: 'Mess Summary',
+                }]
+            }
+        })
 
-            payload.instanceData.state.push({
-                type: 'VMD',
-                key: 'time_counter',
-                value: [1, 2, 3]
-            })
+        api.on.getInspectorState((payload) => {
+            if (payload.inspectorId === inspectorId) {
+                if (payload.nodeId === 'mess-summary') {
+                    payload.state = {
+                        'Mess Score': [{
+                            key: 'overview',
+                            value: {
+                                score: 95,
+                                message: 'Analysis in progress',
+                            },
+                        }],
+                        'Components Analyzed': [{
+                            key: 'analysisReport',
+                            value: 'XYZ Analyzing...',
+                        }],
+                        'Code Health': [{
+                            key: 'codeHealth',
+                            value: 'GHJ Analyzing...',
+                        }],
+                    }
+                }
+            }
         })
     })
 }
