@@ -9,6 +9,7 @@ import pascalcase from 'pascalcase'
 import json from '@rollup/plugin-json'
 import { readFileSync } from 'fs'
 import { terser } from 'rollup-plugin-terser'
+import postcss from 'rollup-plugin-postcss'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -43,16 +44,16 @@ let hasTSChecked = false
 const outputConfigs = {
     'esm-bundler': {
         file: pkg.module,
-        format: 'es'
+        format: 'es',
     },
     global: {
         file: pkg.unpkg,
-        format: 'iife'
+        format: 'iife',
     },
     esm: {
         file: pkg.module.replace('bundler', 'browser'),
-        format: 'es'
-    }
+        format: 'es',
+    },
 }
 
 const createReplacePlugin = (isProduction, isBundlerESMBuild) => {
@@ -62,7 +63,7 @@ const createReplacePlugin = (isProduction, isBundlerESMBuild) => {
             : JSON.stringify(isProduction ? 'production' : 'development'),
         __VUE_PROD_DEVTOOLS__: isBundlerESMBuild
             ? '__VUE_PROD_DEVTOOLS__'
-            : 'false'
+            : 'false',
     }
     Object.keys(replacements).forEach((key) => {
         if (key in process.env) {
@@ -71,7 +72,7 @@ const createReplacePlugin = (isProduction, isBundlerESMBuild) => {
     })
     return replace({
         preventAssignment: true,
-        values: replacements
+        values: replacements,
     })
 }
 
@@ -80,17 +81,17 @@ const createMinifiedConfig = (format) => {
         format,
         {
             file: `dist/${name}.${format}.prod.js`,
-            format: outputConfigs[format].format
+            format: outputConfigs[format].format,
         },
         [
             terser({
                 module: /^esm/.test(format),
                 compress: {
                     ecma: 2015,
-                    pure_getters: true
-                }
-            })
-        ]
+                    pure_getters: true,
+                },
+            }),
+        ],
     )
 }
 
@@ -121,10 +122,10 @@ const createConfig = (format, output, plugins = []) => {
             compilerOptions: {
                 sourceMap: output.sourcemap,
                 declaration: shouldEmitDeclarations,
-                declarationMap: shouldEmitDeclarations
+                declarationMap: shouldEmitDeclarations,
             },
-            exclude: ['__tests__', 'test-dts']
-        }
+            exclude: ['__tests__', 'test-dts'],
+        },
     })
     // we only need to check TS and generate declarations once for each build.
     // it also seems to run into weird issues when checking multiple times
@@ -144,22 +145,23 @@ const createConfig = (format, output, plugins = []) => {
         plugins: [
             json(),
             vuePlugin(),
+            postcss(),
             tsPlugin,
             createReplacePlugin(
                 isProductionBuild,
-                isBundlerESMBuild
+                isBundlerESMBuild,
             ),
             ...nodePlugins,
-            ...plugins
+            ...plugins,
         ],
-        output
+        output,
     }
 }
 
 const allFormats = Object.keys(outputConfigs)
 const packageFormats = allFormats
 const packageConfigs = packageFormats.map((format) =>
-    createConfig(format, outputConfigs[format])
+    createConfig(format, outputConfigs[format]),
 )
 
 // only add the production ready if we are bundling the options

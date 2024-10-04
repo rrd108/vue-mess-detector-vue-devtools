@@ -1,8 +1,15 @@
 import { addCustomTab } from '@vue/devtools-api'
 import { h } from 'vue'
+import VueMessDetectorTab from './VueMessDetectorTab.vue'
 
 export const setupDevtools = () => {
     console.log(`setupDevtools called`)
+
+    const vnode = h(VueMessDetectorTab)
+    /*const vnode1 = h('section', [
+        h('h1', 'Vue Mess Detector Analysis'),
+        h('p', 'This is a custom tab for Vue Mess Detector'),
+    ])*/
 
     addCustomTab({
         name: 'vue-mess-detector',
@@ -11,10 +18,9 @@ export const setupDevtools = () => {
         category: 'modules',
         view: {
             type: 'vnode',
-            vnode: h('section', [
-                h('h1', 'Vue Mess Detector Analysis'),
-                h('p', 'This is a custom tab for Vue Mess Detector')
-            ])
+            vnode,
         },
     })
+
+    console.log('VueMessDetectorTab', vnode)
 }
