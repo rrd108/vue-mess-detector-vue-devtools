@@ -5,7 +5,7 @@ import { onDevToolsClientConnected } from '@vue/devtools-api'
 export const VueMessDetectorVueDevtools = {
     install(app: App, options = {}) {
         console.log(`install called`, { app, options })
-        setupDevtools()
+        setupDevtools(app)
 
         onDevToolsClientConnected(() => {
             console.log('devtools client connected')

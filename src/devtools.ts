@@ -57,6 +57,4 @@ export const setupDevtools = (app: App) => {
             }
         })
     })
-
-    console.log('VueMessDetectorTab', vnode)
 }
